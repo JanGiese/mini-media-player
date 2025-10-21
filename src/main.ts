@@ -31,7 +31,7 @@ import './components/progress';
 import './components/powerstrip';
 import './components/mediaControls';
 
-import { ICON, UPDATE_PROPS, BREAKPOINT } from './const';
+import { UPDATE_PROPS, BREAKPOINT } from './const';
 import { HomeAssistant, MediaPlayerEntity } from './types';
 import { Part } from 'lit-html';
 import { MiniMediaPlayerBaseConfiguration, MiniMediaPlayerConfiguration } from './config/types';
@@ -301,7 +301,12 @@ class MiniMediaPlayer extends LitElement {
 
     const active = !this.config.hide.icon_state && this.player.isActive;
     return html` <div class="entity__icon" ?color=${active}>
-      <ha-icon .icon=${this.computeIcon()}></ha-icon>
+      <ha-state-icon
+        .hass=${this.hass}
+        .icon=${this.config.icon}
+        .state=${this.entity}
+        .stateObj=${this.entity}
+      ></ha-state-icon>
     </div>`;
   }
 
@@ -351,9 +356,9 @@ class MiniMediaPlayer extends LitElement {
           '--mmp-icon-color': this.foregroundColor,
           '--mmp-icon-active-color': this.foregroundColor,
           '--mmp-accent-color': this.foregroundColor,
-          '--paper-slider-container-color': this.foregroundColor,
           '--secondary-text-color': this.foregroundColor,
           '--mmp-media-cover-info-color': this.foregroundColor,
+          '--ha-control-color': this.foregroundColor,
         }),
     });
   }
@@ -368,10 +373,6 @@ class MiniMediaPlayer extends LitElement {
       }
       this.thumbnail = artwork || `url(${picture})`;
     }
-  }
-
-  computeIcon(): string {
-    return this.config.icon ? this.config.icon : this.player.icon || ICON.DEFAULT;
   }
 
   measureCard(): void {

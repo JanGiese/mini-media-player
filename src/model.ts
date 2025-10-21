@@ -1,5 +1,5 @@
 import { MiniMediaPlayerConfiguration } from './config/types';
-import { PROGRESS_PROPS, MEDIA_INFO, PLATFORM, REPEAT_STATE } from './const';
+import { PROGRESS_PROPS, MEDIA_DURATION_PROP, MEDIA_INFO, PLATFORM, REPEAT_STATE } from './const';
 import { HomeAssistant, MediaPlayerEntity, MediaPlayerEntityAttributes, MediaPlayerEntityState } from './types';
 import arrayBufferToBase64 from './utils/misc';
 
@@ -65,6 +65,10 @@ export default class MediaPlayerObject {
 
   get isActive(): boolean {
     return (!this.isOff && !this.isUnavailable && !this.idle) || false;
+  }
+
+  get assumedState(): boolean {
+    return this._attr.assumed_state || false;
   }
 
   get shuffle(): boolean {
@@ -171,7 +175,7 @@ export default class MediaPlayerObject {
   }
 
   get hasProgress(): boolean {
-    return !this.config.hide.progress && !this.idle && PROGRESS_PROPS.every((prop) => prop in this._attr);
+    return !this.config.hide.progress && !this.idle && PROGRESS_PROPS.every((prop) => prop in this._attr) && (this._attr[MEDIA_DURATION_PROP] ?? -1) > -1;
   }
 
   get supportsPrev(): boolean {
@@ -293,6 +297,14 @@ export default class MediaPlayerObject {
   // TODO: fix opts type
   setMedia(e: MouseEvent, opts: MediaPlayerMedia): void {
     this.callService(e, 'play_media', { ...opts });
+  }
+
+  play(e: MouseEvent): void {
+    this.callService(e, 'media_play');
+  }
+
+  pause(e: MouseEvent): void {
+    this.callService(e, 'media_pause');
   }
 
   playPause(e: MouseEvent): void {
